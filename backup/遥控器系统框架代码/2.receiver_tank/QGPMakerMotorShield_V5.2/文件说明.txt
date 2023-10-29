@@ -1,0 +1,8 @@
+关于驱动器详细资料访问：https://www.7gp.cn/archives/308
+
+QGPMakerMotorShield_Lib_V5.2  库程序，是电机驱动板的驱动程序。
+Demo_test：各项小功能的测试
+example：包含了完整的程序示例
+    ArmCar_2WD：适合2轮或4轮差速小车，可控制2个电机和4个舵机 
+    Mecanum4WD：麦克纳姆轮4轮小车，可控制4个电机和4个舵机
+    Tank2WD_Joystick：2轮摇杆差速控制的简单示例，适合履带坦克车

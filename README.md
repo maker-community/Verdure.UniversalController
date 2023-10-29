@@ -14,6 +14,11 @@ https://space.bilibili.com/14368720
 ![content](https://github.com/maker-community/Verdure.UniversalController/assets/24240675/55d67c78-786c-4e57-bb5e-eb6434aa8670)
 
 
+backup目录为作者采用VS加Arduino插件构建的项目，本人将代码重新整理了，可以直接用Arduino IDE编译的版本放到了src目录。
+
+并且采用英文命名。
+
+
 
 
 

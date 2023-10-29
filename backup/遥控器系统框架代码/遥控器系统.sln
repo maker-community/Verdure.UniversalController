@@ -1,0 +1,95 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34003.232
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "1.ControllerSystem", "1.ControllerSystem\1.ControllerSystem.vcxproj", "{44D9310C-585D-4D5C-9E53-FF45658C92A1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFT_eSPI", "C:\Users\卜开元\Documents\Arduino\libraries\TFT_eSPI\TFT_eSPI.vcxitems", "{6C9958DD-9236-4A0C-8863-2DC0E01806E9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wire", "c:\Users\卜开元\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.11\libraries\Wire\Wire.vcxitems", "{78CCD90E-BB10-4888-8B55-C05884C3891D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.receiver_tank", "2.receiver_tank\2.receiver_tank.vcxproj", "{03235217-890D-4B43-BBB5-984A166F8D77}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RF24", "C:\Users\卜开元\Documents\Arduino\libraries\RF24\RF24.vcxitems", "{47C53A2F-7E38-4F45-8AC2-D4F29F8A88F7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bounce2-2.71", "C:\Users\卜开元\Documents\Arduino\libraries\Bounce2\Bounce2-2.71.vcxitems", "{4EA0E302-F11D-4932-A870-F49D5419E1A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM.ActiveCfg = Debug|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM.Build.0 = Debug|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM.Deploy.0 = Debug|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM64.Build.0 = Debug|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x64.ActiveCfg = Debug|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x64.Build.0 = Debug|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x64.Deploy.0 = Debug|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x86.ActiveCfg = Debug|x86
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x86.Build.0 = Debug|x86
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Debug|x86.Deploy.0 = Debug|x86
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM.ActiveCfg = Release|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM.Build.0 = Release|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM.Deploy.0 = Release|ARM
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM64.ActiveCfg = Release|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM64.Build.0 = Release|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|ARM64.Deploy.0 = Release|ARM64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x64.ActiveCfg = Release|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x64.Build.0 = Release|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x64.Deploy.0 = Release|x64
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x86.ActiveCfg = Release|x86
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x86.Build.0 = Release|x86
+		{44D9310C-585D-4D5C-9E53-FF45658C92A1}.Release|x86.Deploy.0 = Release|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM.ActiveCfg = Debug|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM.Build.0 = Debug|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM.Deploy.0 = Debug|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM64.Build.0 = Debug|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x64.ActiveCfg = Debug|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x64.Build.0 = Debug|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x64.Deploy.0 = Debug|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x86.ActiveCfg = Debug|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x86.Build.0 = Debug|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Debug|x86.Deploy.0 = Debug|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM.ActiveCfg = Release|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM.Build.0 = Release|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM.Deploy.0 = Release|ARM
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM64.ActiveCfg = Release|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM64.Build.0 = Release|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|ARM64.Deploy.0 = Release|ARM64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x64.ActiveCfg = Release|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x64.Build.0 = Release|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x64.Deploy.0 = Release|x64
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x86.ActiveCfg = Release|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x86.Build.0 = Release|x86
+		{03235217-890D-4B43-BBB5-984A166F8D77}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BE1B37D4-33B8-4DB0-80ED-343E5A56D238}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		c:\Users\卜开元\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.11\libraries\Wire\Wire.vcxitems*{44d9310c-585d-4d5c-9e53-ff45658c92a1}*SharedItemsImports = 4
+		C:\Users\卜开元\Documents\Arduino\libraries\Bounce2\Bounce2-2.71.vcxitems*{44d9310c-585d-4d5c-9e53-ff45658c92a1}*SharedItemsImports = 4
+		C:\Users\卜开元\Documents\Arduino\libraries\RF24\RF24.vcxitems*{44d9310c-585d-4d5c-9e53-ff45658c92a1}*SharedItemsImports = 4
+		C:\Users\卜开元\Documents\Arduino\libraries\TFT_eSPI\TFT_eSPI.vcxitems*{44d9310c-585d-4d5c-9e53-ff45658c92a1}*SharedItemsImports = 4
+		C:\Users\卜开元\Documents\Arduino\libraries\RF24\RF24.vcxitems*{47c53a2f-7e38-4f45-8ac2-d4f29f8a88f7}*SharedItemsImports = 9
+		C:\Users\卜开元\Documents\Arduino\libraries\Bounce2\Bounce2-2.71.vcxitems*{4ea0e302-f11d-4932-a870-f49d5419e1a3}*SharedItemsImports = 9
+		C:\Users\卜开元\Documents\Arduino\libraries\TFT_eSPI\TFT_eSPI.vcxitems*{6c9958dd-9236-4a0c-8863-2dc0e01806e9}*SharedItemsImports = 9
+		c:\Users\卜开元\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.11\libraries\Wire\Wire.vcxitems*{78ccd90e-bb10-4888-8b55-c05884c3891d}*SharedItemsImports = 9
+	EndGlobalSection
+EndGlobal
