@@ -16,6 +16,11 @@ https://oshwhub.com/bukaiyuan/ESP32-hang-mu-yao-kong-qi
 原作者的B站首页地址：
 https://space.bilibili.com/14368720
 
+2023/11/1 更新日志修复右摇杆左右不工作 由于作者源代码引脚配置错误所以读取不到数值修复如图所示
+![{8A2A25EC-EAC2-4beb-A618-6B27955EA742}](https://github.com/maker-community/Verdure.UniversalController/assets/24240675/d0ade755-68c4-45bc-bac2-c3a48cf14b6e)
+
+
+
 成品效果图如下：
 ![pic](/Images/pic.jpg)
 
