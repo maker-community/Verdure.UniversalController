@@ -10,7 +10,7 @@
 #define PIN_L_UP 46		  // 左侧上按键
 #define PIN_L_DOWN 39     // 左侧下按键
 
-#define PIN_RX 10         // 右摇杆X
+#define PIN_RX 16         // 右摇杆X
 #define PIN_RY 15		  // 右摇杆Y
 #define PIN_R_KNOB 3	  // 右旋钮
 #define PIN_R_UP 45		  // 右侧上按键
