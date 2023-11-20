@@ -65,26 +65,10 @@ void loop()
    if (radio.available())
    { // 是否有可用的数据（是否收到数据）
       radio.read(&tank_kvs, sizeof(tank_kvs));
-      // if (tank_kvs.LX >= 0 && tank_kvs.LX < 40)
-      // {
-      //    // 控制车子右转
-      //    // Serial.println("控制舵机正");
-      //    duoji.write(tank_kvs.LX);
-      // }
-      if(tank_kvs.LX < 0)
-      {
-         int lx = abs(tank_kvs.LX);
-         int lx2 = abs(50 - tank_kvs.LX);
-         // 控制车子右转
-         // Serial.println("控制舵机正");
-         duoji.write(lx2);
-      }
-      // else
-      // {
-      //    //控制车子左转
-      //    Serial.println("控制舵机反");
-      //    myservo.write((90 / 100) * tank_kvs.LX + 90);
-      // }
+      
+      int angle = map(tank_kvs.LX, -100, 100, 180, 0);  // 将遥控器数据映射到舵机角度范围
+
+      duoji.write(angle);  // 将舵机转动到对应角度
 
       if (tank_kvs.RY < 0)
       {
@@ -92,10 +76,13 @@ void loop()
          // int ry = abs(tank_kvs.RY);
          // int speed = 250 * (ry / 100) + 1350;
          int ry = abs(tank_kvs.RY);
-         int speed = ry*2 + 1350;
-         Serial.println(speed);
-         motor.writeMicroseconds(speed);
+
+
+         int speed1 = map(tank_kvs.RY, -100, 100, 2000, 700);
+         //int speed = ry*2 + 1350;
+         //Serial.println(speed);
+         motor.writeMicroseconds(speed1);
       }
-      delay(100);
+      delay(50);
    }
 }
