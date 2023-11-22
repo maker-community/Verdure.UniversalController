@@ -22,7 +22,7 @@ https://space.bilibili.com/14368720
 
 
 成品效果图如下：
-![pic](/Images/pic.jpg)
+[![B站视频演示链接](/Images/pic.jpg)](https://www.bilibili.com/video/BV1SN4y1k7d2/)
 
 ![content](https://github.com/maker-community/Verdure.UniversalController/assets/24240675/55d67c78-786c-4e57-bb5e-eb6434aa8670)
 
