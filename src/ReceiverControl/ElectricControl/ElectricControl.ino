@@ -56,7 +56,7 @@ void setup()
                                       // Serial.println("我是接收端");
    if (callibrate != 1)
    {
-      motor.writeMicroseconds(idle);
+      motor.writeMicroseconds(slow);
    }
 }
 
@@ -66,7 +66,7 @@ void loop()
    { // 是否有可用的数据（是否收到数据）
       radio.read(&tank_kvs, sizeof(tank_kvs));
       
-      int angle = map(tank_kvs.LX, -100, 100, 180, 0);  // 将遥控器数据映射到舵机角度范围
+      int angle = map(tank_kvs.LX, -100, 100, 120, 80);  // 将遥控器数据映射到舵机角度范围
 
       duoji.write(angle);  // 将舵机转动到对应角度
 
@@ -75,10 +75,16 @@ void loop()
          // 控制车子前进
          // int ry = abs(tank_kvs.RY);
          // int speed = 250 * (ry / 100) + 1350;
-         int ry = abs(tank_kvs.RY);
+         //int ry = abs(tank_kvs.RY);
 
 
-         int speed1 = map(tank_kvs.RY, -100, 100, 2000, 700);
+         int speed1 = map(tank_kvs.RY, -100, 0, 2000, 900);
+         //int speed = ry*2 + 1350;
+         //Serial.println(speed);
+         motor.writeMicroseconds(speed1);
+      }
+      else if(tank_kvs.RY > 0){
+           int speed1 = map(tank_kvs.RY, 0, 100, 900, 0);
          //int speed = ry*2 + 1350;
          //Serial.println(speed);
          motor.writeMicroseconds(speed1);
