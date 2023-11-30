@@ -46,6 +46,13 @@ src=> ReceiverDemo目录的代码为通讯控制舵机测试代码，用Arduino 
 src=> libraries 包含项目用到的依赖库 重要通知，由于这个23017在库里下载不到，所以我把源文件上传了，大家其他的库都可以下载的到。
 
 
+接收器PCB板子地址
+https://oshwhub.com/greenshade/arduino_nano_receive
+
+接收器板子实物图
+![实物图](/Images/receive.jpeg)
+
+
 
 
 
