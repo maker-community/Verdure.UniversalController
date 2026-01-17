@@ -66,7 +66,7 @@ void loop()
    { // 是否有可用的数据（是否收到数据）
       radio.read(&tank_kvs, sizeof(tank_kvs));
       
-      int angle = map(tank_kvs.LX, -100, 100, 120, 80);  // 将遥控器数据映射到舵机角度范围
+      int angle = map(tank_kvs.LX, 100, -100, 120, 50);  // 将遥控器数据映射到舵机角度范围
 
       duoji.write(angle);  // 将舵机转动到对应角度
 
@@ -89,6 +89,10 @@ void loop()
          //Serial.println(speed);
          motor.writeMicroseconds(speed1);
       }
-      delay(50);
+      delay(80);
+   }
+   else
+   {
+      motor.writeMicroseconds(900);
    }
 }
