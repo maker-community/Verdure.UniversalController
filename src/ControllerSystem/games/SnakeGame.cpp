@@ -154,9 +154,9 @@ void SnakeGame::initGame() {
     paused = false;
     
     // 初始化蛇的位置（中央偏上）
-    snake[0] = {15, 30};
-    snake[1] = {14, 30};
-    snake[2] = {13, 30};
+    snake[0] = {12, 24};
+    snake[1] = {11, 24};
+    snake[2] = {10, 24};
     
     // 生成第一个食物
     generateFood();
