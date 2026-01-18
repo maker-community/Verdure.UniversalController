@@ -750,7 +750,203 @@ void ship() { Serial.println("1.6 舰船"); }
 
 //----------------------------------------------2.本机游戏-----------------------------------------------------
 // 2.1 贪吃蛇
-void snake() { Serial.println("2.1 贪吃蛇"); }
+void snake() { 
+	Serial.println("2.1 贪吃蛇");
+	
+	// 游戏配置
+	const int gridSize = 10;           // 每个格子大小（像素）
+	const int maxLength = 200;         // 蛇最大长度
+	const int gridWidth = 24;          // 游戏区域宽度（格子数）
+	const int gridHeight = 50;         // 游戏区域高度（格子数）
+	const int moveDelay = 150;         // 移动间隔（毫秒）
+	
+	// 蛇身坐标数组
+	int snakeX[maxLength];
+	int snakeY[maxLength];
+	int snakeLength = 3;               // 初始长度
+	
+	// 初始化蛇的位置（从左到右）
+	snakeX[0] = 12; snakeY[0] = 25;    // 蛇头
+	snakeX[1] = 11; snakeY[1] = 25;
+	snakeX[2] = 10; snakeY[2] = 25;    // 蛇尾
+	
+	// 方向：0=上 1=右 2=下 3=左
+	int direction = 1;                  // 初始向右
+	int nextDirection = 1;              // 下一个方向（防止180度转向）
+	
+	// 食物位置
+	int foodX = random(2, gridWidth - 2);
+	int foodY = random(5, gridHeight - 5);
+	
+	// 游戏状态
+	bool gameOver = false;
+	bool paused = false;
+	int score = 0;
+	uint32_t lastMoveTime = millis();
+	
+	// 游戏主循环
+	while (!gameOver) {
+		keys.kvs_update();
+		
+		// 暂停控制
+		if (keys.o.pressed()) {
+			paused = !paused;
+			if (paused) {
+				screen.spr.setTextColor(TFT_YELLOW);
+				screen.spr.drawString("PAUSED", 120, 260, 4);
+				lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
+			}
+		}
+		
+		// 退出游戏
+		if (keys.x.pressed()) {
+			screen.spr.fillSprite(TFT_BLACK);
+			break;
+		}
+		
+		// 如果暂停，跳过游戏逻辑
+		if (paused) {
+			delay(10);
+			continue;
+		}
+		
+		// 方向控制（使用功能键）
+		if (keys.up.pressed() && direction != 2) nextDirection = 0;
+		if (keys.right.pressed() && direction != 3) nextDirection = 1;
+		if (keys.down.pressed() && direction != 0) nextDirection = 2;
+		if (keys.left.pressed() && direction != 1) nextDirection = 3;
+		
+		// 游戏逻辑更新（按固定时间间隔）
+		if (millis() - lastMoveTime >= moveDelay) {
+			lastMoveTime = millis();
+			direction = nextDirection;
+			
+			// 移动蛇身（从尾到头）
+			for (int i = snakeLength - 1; i > 0; i--) {
+				snakeX[i] = snakeX[i - 1];
+				snakeY[i] = snakeY[i - 1];
+			}
+			
+			// 移动蛇头
+			switch (direction) {
+				case 0: snakeY[0]--; break;  // 上
+				case 1: snakeX[0]++; break;  // 右
+				case 2: snakeY[0]++; break;  // 下
+				case 3: snakeX[0]--; break;  // 左
+			}
+			
+			// 检测撞墙
+			if (snakeX[0] < 0 || snakeX[0] >= gridWidth || 
+			    snakeY[0] < 0 || snakeY[0] >= gridHeight) {
+				gameOver = true;
+			}
+			
+			// 检测撞到自己
+			for (int i = 1; i < snakeLength; i++) {
+				if (snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i]) {
+					gameOver = true;
+					break;
+				}
+			}
+			
+			// 检测吃到食物
+			if (snakeX[0] == foodX && snakeY[0] == foodY) {
+				if (snakeLength < maxLength) {
+					snakeLength++;
+					score += 10;
+				}
+				// 重新生成食物（确保不在蛇身上）
+				bool validFood = false;
+				while (!validFood) {
+					foodX = random(1, gridWidth - 1);
+					foodY = random(1, gridHeight - 1);
+					validFood = true;
+					for (int i = 0; i < snakeLength; i++) {
+						if (foodX == snakeX[i] && foodY == snakeY[i]) {
+							validFood = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			// 绘制游戏画面
+			screen.spr.fillSprite(TFT_BLACK);
+			
+			// 绘制边框
+			screen.spr.drawRect(0, 0, gridWidth * gridSize, gridHeight * gridSize, TFT_WHITE);
+			
+			// 绘制蛇身
+			for (int i = 0; i < snakeLength; i++) {
+				uint32_t color = (i == 0) ? TFT_GREENYELLOW : TFT_GREEN;  // 蛇头更亮
+				screen.spr.fillRect(snakeX[i] * gridSize + 1, 
+				                  snakeY[i] * gridSize + 1, 
+				                  gridSize - 2, 
+				                  gridSize - 2, 
+				                  color);
+				// 蛇头加个小圆点
+				if (i == 0) {
+					screen.spr.fillCircle(snakeX[i] * gridSize + gridSize/2, 
+					                    snakeY[i] * gridSize + gridSize/2, 
+					                    2, TFT_YELLOW);
+				}
+			}
+			
+			// 绘制食物（闪烁效果）
+			uint32_t foodColor = (millis() / 200) % 2 ? TFT_RED : TFT_ORANGE;
+			screen.spr.fillCircle(foodX * gridSize + gridSize/2, 
+			                    foodY * gridSize + gridSize/2, 
+			                    gridSize/2 - 1, 
+			                    foodColor);
+			
+			// 显示分数和长度
+			screen.spr.setTextColor(TFT_CYAN);
+			screen.spr.setTextDatum(TL_DATUM);
+			screen.spr.drawString("Score:" + String(score), 5, gridHeight * gridSize + 5, 2);
+			screen.spr.drawString("Length:" + String(snakeLength), 5, gridHeight * gridSize + 25, 2);
+			
+			// 显示控制提示
+			screen.spr.setTextColor(TFT_YELLOW);
+			screen.spr.setTextDatum(TR_DATUM);
+			screen.spr.drawString("O:Pause X:Quit", 235, gridHeight * gridSize + 5, 2);
+			
+			// 推送到屏幕
+			lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
+		}
+		
+		delay(10);
+	}
+	
+	// 游戏结束画面
+	if (gameOver) {
+		screen.spr.fillRect(40, 200, 160, 120, TFT_BLACK);
+		screen.spr.drawRect(40, 200, 160, 120, TFT_RED);
+		screen.spr.fillRect(42, 202, 156, 116, TFT_NAVY);
+		
+		screen.spr.setTextColor(TFT_RED);
+		screen.spr.setTextDatum(MC_DATUM);
+		screen.spr.drawString("GAME OVER!", 120, 230, 4);
+		
+		screen.spr.setTextColor(TFT_WHITE);
+		screen.spr.drawString("Score: " + String(score), 120, 260, 2);
+		screen.spr.drawString("Length: " + String(snakeLength), 120, 280, 2);
+		
+		screen.spr.setTextColor(TFT_YELLOW);
+		screen.spr.drawString("Press X to exit", 120, 300, 2);
+		
+		lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
+		
+		// 等待退出
+		while (!keys.x.pressed()) {
+			keys.kvs_update();
+			delay(10);
+		}
+		screen.spr.fillSprite(TFT_BLACK);
+	}
+	
+	// 恢复文本对齐方式
+	screen.spr.setTextDatum(TC_DATUM);
+}
 
 // 2.2 打砖块
 void brick() { Serial.println("2.2 打砖块"); }
