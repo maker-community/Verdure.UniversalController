@@ -191,30 +191,44 @@ void SnakeGame::showWelcome() {
     screen.spr.setTextDatum(MC_DATUM);
     screen.spr.drawString("贪吃蛇", 120, 150);
     
-    screen.spr.unloadFont();  // 卸载字库以使用默认字体显示数字
+    screen.spr.unloadFont();
     
-    // 历史记录标题
+    // 记录标题
     screen.spr.setTextColor(TFT_YELLOW);
     screen.spr.setTextDatum(MC_DATUM);
     screen.spr.loadFont(chinese_32);
     screen.spr.drawString("记录", 120, 200);
     screen.spr.unloadFont();
     
-    // 记录数据
+    // 记录数据（使用数字，避免文字限制）
+    screen.spr.setTextColor(TFT_WHITE);
+    screen.spr.setTextDatum(TL_DATUM);
+    screen.spr.loadFont(chinese_32);
+    screen.spr.drawString("最高", 40, 250);
+    screen.spr.unloadFont();
+    screen.spr.setTextColor(TFT_GOLD);
+    screen.spr.drawString(String(highScore), 150, 250, 4);
+    
     screen.spr.setTextColor(TFT_WHITE);
     screen.spr.loadFont(chinese_32);
-    screen.spr.drawString("最高分 " + String(highScore), 120, 240);
-    screen.spr.drawString("最长 " + String(bestLength), 120, 280);
-    screen.spr.drawString("游戏数 " + String(totalGames), 120, 320);
+    screen.spr.drawString("最长", 40, 295);
     screen.spr.unloadFont();
+    screen.spr.setTextColor(TFT_GREENYELLOW);
+    screen.spr.drawString(String(bestLength), 150, 295, 4);
+    
+    screen.spr.setTextColor(TFT_WHITE);
+    screen.spr.loadFont(chinese_32);
+    screen.spr.drawString("游戏", 40, 340);
+    screen.spr.unloadFont();
+    screen.spr.setTextColor(TFT_CYAN);
+    screen.spr.drawString(String(totalGames), 150, 340, 4);
     
     // 操作提示
     screen.spr.setTextColor(TFT_GREEN);
-    screen.spr.loadFont(chinese_32);
-    screen.spr.drawString("按 O 键", 120, 380);
+    screen.spr.setTextDatum(MC_DATUM);
+    screen.spr.drawString("Press O", 120, 400, 2);
     screen.spr.setTextColor(TFT_RED);
-    screen.spr.drawString("按 X 键", 120, 430);
-    screen.spr.unloadFont();
+    screen.spr.drawString("Press X", 120, 440, 2);
     
     lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
 }
