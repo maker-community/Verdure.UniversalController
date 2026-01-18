@@ -18,7 +18,8 @@
 #include "chinese_32.h"  // 中文字库
 #include <Preferences.h>  // ESP32持久化存储库
 
-
+// 游戏模块
+#include "games/SnakeGame.h"
 
 // 包含图标：一级菜单
 #include "icons/1nrf.h"
@@ -751,7 +752,14 @@ void ship() { Serial.println("1.6 舰船"); }
 
 //----------------------------------------------2.本机游戏-----------------------------------------------------
 // 2.1 贪吃蛇
-void snake() { 
+void snake() {
+	SnakeGame game(screen, keys);
+	game.run();
+}
+
+// 以下是原始的内联实现，已迁移到 games/SnakeGame.cpp
+/*
+void snake_old() { 
 	Serial.println("2.1 贪吃蛇");
 	
 	// 初始化 Preferences 存储
@@ -1051,6 +1059,7 @@ void snake() {
 	// 恢复文本对齐方式
 	screen.spr.setTextDatum(TC_DATUM);
 }
+*/
 
 // 2.2 打砖块
 void brick() { Serial.println("2.2 打砖块"); }
