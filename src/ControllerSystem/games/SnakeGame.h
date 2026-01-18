@@ -5,7 +5,6 @@
 #include <Preferences.h>
 #include "../Screen.h"
 #include "../Keys.h"
-#include "../chinese_32.h"
 
 class SnakeGame {
 public:

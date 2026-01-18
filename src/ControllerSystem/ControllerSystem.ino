@@ -20,6 +20,7 @@
 
 // 游戏模块
 #include "games/SnakeGame.h"
+#include "games/SnakeGame.cpp"  // Arduino IDE 需要显式包含 .cpp 文件
 
 // 包含图标：一级菜单
 #include "icons/1nrf.h"

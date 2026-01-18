@@ -1,4 +1,5 @@
 #include "SnakeGame.h"
+#include "../chinese_32.h"  // 中文字库只在实现文件中包含
 
 SnakeGame::SnakeGame(Screen& screen, Keys& keys) 
     : screen(screen), keys(keys), 
