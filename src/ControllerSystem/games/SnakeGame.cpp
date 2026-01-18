@@ -116,15 +116,15 @@ void SnakeGame::run() {
         
         if (newRecord) {
             screen.spr.setTextColor(TFT_GOLD);
-            screen.spr.drawString("★ 新纪录 ★", 120, 220);
+            screen.spr.drawString("新纪录", 120, 220);
         }
         
         screen.spr.setTextColor(TFT_WHITE);
-        screen.spr.drawString("本局分数: " + String(score), 120, 260);
-        screen.spr.drawString("本局长度: " + String(snakeLength), 120, 295);
+        screen.spr.drawString("本局分数 " + String(score), 120, 260);
+        screen.spr.drawString("本局长度 " + String(snakeLength), 120, 295);
         
         screen.spr.setTextColor(TFT_CYAN);
-        screen.spr.drawString("历史最高: " + String(highScore), 120, 330);
+        screen.spr.drawString("历史最高 " + String(highScore), 120, 330);
         
         screen.spr.setTextColor(TFT_YELLOW);
         screen.spr.drawString("按 X 键退出", 120, 370);
@@ -196,14 +196,16 @@ void SnakeGame::showWelcome() {
     // 历史记录标题
     screen.spr.setTextColor(TFT_YELLOW);
     screen.spr.setTextDatum(MC_DATUM);
-    screen.spr.drawString("-- Historical Records --", 120, 200, 2);
+    screen.spr.loadFont(chinese_32);
+    screen.spr.drawString("历史记录", 120, 200);
+    screen.spr.unloadFont();
     
     // 记录数据
     screen.spr.setTextColor(TFT_WHITE);
     screen.spr.loadFont(chinese_32);
-    screen.spr.drawString("最高分: " + String(highScore), 120, 240);
-    screen.spr.drawString("最长: " + String(bestLength), 120, 280);
-    screen.spr.drawString("总局数: " + String(totalGames), 120, 320);
+    screen.spr.drawString("最高分 " + String(highScore), 120, 240);
+    screen.spr.drawString("最长 " + String(bestLength), 120, 280);
+    screen.spr.drawString("总局数 " + String(totalGames), 120, 320);
     screen.spr.unloadFont();
     
     // 操作提示
@@ -318,20 +320,20 @@ void SnakeGame::drawGame() {
     // 第一行：分数和长度
     screen.spr.setTextColor(TFT_CYAN);
     screen.spr.setTextDatum(TL_DATUM);
-    screen.spr.drawString("分:" + String(score), 5, infoY);
+    screen.spr.drawString("分 " + String(score), 5, infoY);
     
     screen.spr.setTextColor(TFT_YELLOW);
-    screen.spr.drawString("长:" + String(snakeLength), 90, infoY);
+    screen.spr.drawString("长 " + String(snakeLength), 90, infoY);
     
     // 显示最高分或新纪录
     if (score >= highScore && score > 0) {
         screen.spr.setTextColor(TFT_GOLD);
         screen.spr.setTextDatum(TR_DATUM);
-        screen.spr.drawString("新纪录!", 235, infoY);
+        screen.spr.drawString("新纪录", 235, infoY);
     } else if (highScore > 0) {
         screen.spr.setTextColor(TFT_SILVER);
         screen.spr.setTextDatum(TR_DATUM);
-        screen.spr.drawString("最高:" + String(highScore), 235, infoY);
+        screen.spr.drawString("最高 " + String(highScore), 235, infoY);
     }
     
     screen.spr.unloadFont();
