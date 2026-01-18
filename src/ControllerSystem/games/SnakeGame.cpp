@@ -1,5 +1,6 @@
 #include "SnakeGame.h"
-#include "../chinese_32.h"  // 中文字库只在实现文件中包含
+
+// 中文字库已在 ControllerSystem.ino 中包含，此处无需重复包含
 
 SnakeGame::SnakeGame(Screen& screen, Keys& keys) 
     : screen(screen), keys(keys), 
