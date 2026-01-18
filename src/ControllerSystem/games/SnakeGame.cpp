@@ -197,7 +197,7 @@ void SnakeGame::showWelcome() {
     screen.spr.setTextColor(TFT_YELLOW);
     screen.spr.setTextDatum(MC_DATUM);
     screen.spr.loadFont(chinese_32);
-    screen.spr.drawString("历史记录", 120, 200);
+    screen.spr.drawString("记录", 120, 200);
     screen.spr.unloadFont();
     
     // 记录数据
@@ -205,15 +205,15 @@ void SnakeGame::showWelcome() {
     screen.spr.loadFont(chinese_32);
     screen.spr.drawString("最高分 " + String(highScore), 120, 240);
     screen.spr.drawString("最长 " + String(bestLength), 120, 280);
-    screen.spr.drawString("总局数 " + String(totalGames), 120, 320);
+    screen.spr.drawString("游戏数 " + String(totalGames), 120, 320);
     screen.spr.unloadFont();
     
     // 操作提示
     screen.spr.setTextColor(TFT_GREEN);
     screen.spr.loadFont(chinese_32);
-    screen.spr.drawString("按 O 键开始", 120, 380);
+    screen.spr.drawString("按 O 键", 120, 380);
     screen.spr.setTextColor(TFT_RED);
-    screen.spr.drawString("按 X 键退出", 120, 430);
+    screen.spr.drawString("按 X 键", 120, 430);
     screen.spr.unloadFont();
     
     lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
