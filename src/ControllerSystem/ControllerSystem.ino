@@ -16,6 +16,7 @@
 #include "controller_keys.h" // 按键引脚定义
 
 #include "chinese_32.h"  // 中文字库
+#include <Preferences.h>  // ESP32持久化存储库
 
 
 
@@ -753,6 +754,20 @@ void ship() { Serial.println("1.6 舰船"); }
 void snake() { 
 	Serial.println("2.1 贪吃蛇");
 	
+	// 初始化 Preferences 存储
+	Preferences prefs;
+	prefs.begin("snake_game", false);  // 命名空间: snake_game, 读写模式
+	
+	// 读取历史最佳记录
+	int highScore = prefs.getInt("highScore", 0);        // 最高分
+	int bestLength = prefs.getInt("bestLength", 3);      // 最长蛇身
+	int totalGames = prefs.getInt("totalGames", 0);      // 总游戏次数
+	
+	Serial.println("=== 读取游戏存档 ===");
+	Serial.println("最高分: " + String(highScore));
+	Serial.println("最长蛇身: " + String(bestLength));
+	Serial.println("总游戏次数: " + String(totalGames));
+	
 	// 游戏配置
 	const int gridSize = 10;           // 每个格子大小（像素）
 	const int maxLength = 200;         // 蛇最大长度
@@ -784,6 +799,42 @@ void snake() {
 	int score = 0;
 	uint32_t lastMoveTime = millis();
 	
+	// 显示开始画面（包含历史记录）
+	screen.spr.fillSprite(TFT_BLACK);
+	screen.spr.setTextColor(TFT_CYAN);
+	screen.spr.setTextDatum(MC_DATUM);
+	screen.spr.drawString("SNAKE GAME", 120, 200, 4);
+	
+	screen.spr.setTextColor(TFT_YELLOW);
+	screen.spr.drawString("=== Best Records ===", 120, 240, 2);
+	screen.spr.setTextColor(TFT_WHITE);
+	screen.spr.drawString("High Score: " + String(highScore), 120, 265, 2);
+	screen.spr.drawString("Best Length: " + String(bestLength), 120, 285, 2);
+	screen.spr.drawString("Total Games: " + String(totalGames), 120, 305, 2);
+	
+	screen.spr.setTextColor(TFT_GREEN);
+	screen.spr.drawString("Press O to Start", 120, 340, 2);
+	screen.spr.setTextColor(TFT_RED);
+	screen.spr.drawString("Press X to Exit", 120, 365, 2);
+	
+	lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
+	
+	// 等待开始或退出
+	bool gameStarted = false;
+	while (!gameStarted) {
+		keys.kvs_update();
+		if (keys.o.pressed()) {
+			gameStarted = true;
+		}
+		if (keys.x.pressed()) {
+			screen.spr.fillSprite(TFT_BLACK);
+			screen.spr.setTextDatum(TC_DATUM);
+			prefs.end();
+			return;
+		}
+		delay(10);
+	}
+	
 	// 游戏主循环
 	while (!gameOver) {
 		keys.kvs_update();
@@ -793,6 +844,7 @@ void snake() {
 			paused = !paused;
 			if (paused) {
 				screen.spr.setTextColor(TFT_YELLOW);
+				screen.spr.setTextDatum(MC_DATUM);
 				screen.spr.drawString("PAUSED", 120, 260, 4);
 				lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
 			}
@@ -903,7 +955,16 @@ void snake() {
 			screen.spr.setTextColor(TFT_CYAN);
 			screen.spr.setTextDatum(TL_DATUM);
 			screen.spr.drawString("Score:" + String(score), 5, gridHeight * gridSize + 5, 2);
-			screen.spr.drawString("Length:" + String(snakeLength), 5, gridHeight * gridSize + 25, 2);
+			screen.spr.drawString("Len:" + String(snakeLength), 5, gridHeight * gridSize + 25, 2);
+			
+			// 显示最高分（如果当前分数超过）
+			if (score >= highScore) {
+				screen.spr.setTextColor(TFT_GOLD);
+				screen.spr.drawString("NEW!", 90, gridHeight * gridSize + 5, 2);
+			} else {
+				screen.spr.setTextColor(TFT_SILVER);
+				screen.spr.drawString("Best:" + String(highScore), 90, gridHeight * gridSize + 5, 2);
+			}
 			
 			// 显示控制提示
 			screen.spr.setTextColor(TFT_YELLOW);
@@ -917,22 +978,62 @@ void snake() {
 		delay(10);
 	}
 	
-	// 游戏结束画面
+	// 游戏结束 - 保存记录
 	if (gameOver) {
-		screen.spr.fillRect(40, 200, 160, 120, TFT_BLACK);
-		screen.spr.drawRect(40, 200, 160, 120, TFT_RED);
-		screen.spr.fillRect(42, 202, 156, 116, TFT_NAVY);
+		totalGames++;  // 游戏次数+1
+		bool newRecord = false;
+		
+		// 更新最高分
+		if (score > highScore) {
+			highScore = score;
+			prefs.putInt("highScore", highScore);
+			newRecord = true;
+			Serial.println("🎉 新纪录！最高分: " + String(highScore));
+		}
+		
+		// 更新最长蛇身
+		if (snakeLength > bestLength) {
+			bestLength = snakeLength;
+			prefs.putInt("bestLength", bestLength);
+			newRecord = true;
+			Serial.println("🎉 新纪录！最长蛇身: " + String(bestLength));
+		}
+		
+		// 更新总游戏次数
+		prefs.putInt("totalGames", totalGames);
+		
+		Serial.println("=== 保存游戏记录 ===");
+		Serial.println("当前分数: " + String(score));
+		Serial.println("当前长度: " + String(snakeLength));
+		Serial.println("最高分: " + String(highScore));
+		Serial.println("最长蛇身: " + String(bestLength));
+		Serial.println("总游戏次数: " + String(totalGames));
+		
+		// 游戏结束画面
+		screen.spr.fillRect(30, 180, 180, 180, TFT_BLACK);
+		screen.spr.drawRect(30, 180, 180, 180, TFT_RED);
+		screen.spr.fillRect(32, 182, 176, 176, TFT_NAVY);
 		
 		screen.spr.setTextColor(TFT_RED);
 		screen.spr.setTextDatum(MC_DATUM);
-		screen.spr.drawString("GAME OVER!", 120, 230, 4);
+		screen.spr.drawString("GAME OVER!", 120, 205, 4);
+		
+		// 如果破纪录，显示特效
+		if (newRecord) {
+			screen.spr.setTextColor(TFT_GOLD);
+			screen.spr.drawString("*** NEW RECORD! ***", 120, 235, 2);
+		}
 		
 		screen.spr.setTextColor(TFT_WHITE);
 		screen.spr.drawString("Score: " + String(score), 120, 260, 2);
 		screen.spr.drawString("Length: " + String(snakeLength), 120, 280, 2);
 		
+		screen.spr.setTextColor(TFT_CYAN);
+		screen.spr.drawString("High Score: " + String(highScore), 120, 305, 2);
+		screen.spr.drawString("Best Length: " + String(bestLength), 120, 325, 2);
+		
 		screen.spr.setTextColor(TFT_YELLOW);
-		screen.spr.drawString("Press X to exit", 120, 300, 2);
+		screen.spr.drawString("Press X to exit", 120, 345, 2);
 		
 		lcd_PushColors(0, 0, 240, 536, (uint16_t*)screen.spr.getPointer());
 		
@@ -943,6 +1044,9 @@ void snake() {
 		}
 		screen.spr.fillSprite(TFT_BLACK);
 	}
+	
+	// 关闭存储
+	prefs.end();
 	
 	// 恢复文本对齐方式
 	screen.spr.setTextDatum(TC_DATUM);
