@@ -8,18 +8,32 @@
 #define SERVO_PIN 6 // 宏定义舵机控制引脚
 
 #define MAX_SIGNAL 2000
-#define MIN_SIGNAL 700
+#define MIN_SIGNAL 1000
 
 #define MOTOR_PIN 3 // 九号引脚是紫色的引脚 也就是D3
 #define DUOJI_PIN 6 // 舵机引脚
 
-int idle = (MAX_SIGNAL + MIN_SIGNAL) / 2;
-int slow = (MAX_SIGNAL - idle) / 3;
-int med = slow * 2;
-int fast = MAX_SIGNAL;
+const int ESC_NEUTRAL = 1500; // 根据电调校准的中位值调整
+const int ESC_DEADBAND = 5;  // 中位死区，避免抖动
+const bool CALIBRATION_BY_POWER = true; // 按住power进入校准模式
+const int CALIBRATION_THRESHOLD = 50; // 校准阈值（摇杆超过此值进入最大）
+const float THROTTLE_EXPO = 1.7f; // 油门曲线>1更柔和
+const int BRAKE_DELAY_MS = 300; // 倒车前刹车延迟（毫秒）
+const unsigned long SIGNAL_TIMEOUT_MS = 200; // 信号超时阈值（毫秒）
+const int SERVO_NEUTRAL_ANGLE = 85; // 舵机中位角度
 int callibrate = 2;
 
 int pos = 0; // 角度存储变量
+
+// 信号监控
+unsigned long lastSignalTime = 0; // 最后接收到信号的时间
+bool signalLost = true; // 信号丢失标志
+unsigned int signalLostCount = 0; // 连续丢失计数
+
+// 倒车保护状态机
+enum ThrottleState { STATE_NEUTRAL, STATE_FORWARD, STATE_REVERSE, STATE_BRAKING };
+ThrottleState currentState = STATE_NEUTRAL;
+unsigned long brakeStartTime = 0;
 
 Servo motor;
 Servo duoji;
@@ -56,43 +70,162 @@ void setup()
                                       // Serial.println("我是接收端");
    if (callibrate != 1)
    {
-      motor.writeMicroseconds(slow);
+      motor.writeMicroseconds(ESC_NEUTRAL);
    }
+   
+   // 初始化信号监控
+   lastSignalTime = millis();
+   duoji.write(SERVO_NEUTRAL_ANGLE); // 舵机初始回中
+   
+   Serial.println("接收端初始化完成，等待信号...");
 }
 
 void loop()
 {
+   unsigned long currentTime = millis();
+   
    if (radio.available())
-   { // 是否有可用的数据（是否收到数据）
+   { // 接收到数据
       radio.read(&tank_kvs, sizeof(tank_kvs));
       
+      // 更新信号状态
+      lastSignalTime = currentTime;
+      if (signalLost) {
+         signalLost = false;
+         signalLostCount = 0;
+         Serial.println("信号恢复");
+      }
+      
+      // 舵机控制
       int angle = map(tank_kvs.LX, 100, -100, 120, 50);  // 将遥控器数据映射到舵机角度范围
-
       duoji.write(angle);  // 将舵机转动到对应角度
 
-      if (tank_kvs.RY < 0)
+      // 电机控制
+      int speed1 = ESC_NEUTRAL;
+      bool calibrationMode = CALIBRATION_BY_POWER && tank_kvs.power;
+      int ry = constrain(tank_kvs.RY, -100, 100);
+
+      if (calibrationMode)
       {
-         // 控制车子前进
-         // int ry = abs(tank_kvs.RY);
-         // int speed = 250 * (ry / 100) + 1350;
-         //int ry = abs(tank_kvs.RY);
-
-
-         int speed1 = map(tank_kvs.RY, -100, 0, 2000, 900);
-         //int speed = ry*2 + 1350;
-         //Serial.println(speed);
-         motor.writeMicroseconds(speed1);
+         // 校准模式：上推(-100)=正向最大, 下推(100)=反向最大
+         if (ry < -CALIBRATION_THRESHOLD)
+         {
+            speed1 = MAX_SIGNAL; // 上推：正向最大
+         }
+         else if (ry > CALIBRATION_THRESHOLD)
+         {
+            speed1 = MIN_SIGNAL; // 下推：反向最大
+         }
+         else
+         {
+            speed1 = ESC_NEUTRAL; // 中位
+         }
       }
-      else if(tank_kvs.RY > 0){
-           int speed1 = map(tank_kvs.RY, 0, 100, 900, 0);
-         //int speed = ry*2 + 1350;
-         //Serial.println(speed);
-         motor.writeMicroseconds(speed1);
+      else
+      {
+         // 正常模式：带倒车保护
+         if (abs(ry) <= ESC_DEADBAND)
+         {
+            speed1 = ESC_NEUTRAL;
+            currentState = STATE_NEUTRAL;
+         }
+         else
+         {
+            // 油门曲线：上推(-100)=正向, 下推(100)=反向
+            float x = ry / 100.0f; // -1..1
+            float ax = fabs(x);
+            float curved = pow(ax, THROTTLE_EXPO);
+            float y = (x < 0) ? -curved : curved; // -1..1
+
+            int targetSpeed = ESC_NEUTRAL;
+            ThrottleState targetState = STATE_NEUTRAL;
+
+            if (y < 0)
+            {
+               // 上推（负值）：正向
+               targetSpeed = ESC_NEUTRAL + (int)((MAX_SIGNAL - ESC_NEUTRAL) * (-y));
+               targetState = STATE_FORWARD;
+            }
+            else
+            {
+               // 下推（正值）：反向
+               targetSpeed = ESC_NEUTRAL - (int)((ESC_NEUTRAL - MIN_SIGNAL) * y);
+               targetState = STATE_REVERSE;
+            }
+
+            // 倒车保护逻辑
+            if (targetState == STATE_REVERSE && currentState == STATE_FORWARD)
+            {
+               // 从前进切到倒车：先刹车
+               currentState = STATE_BRAKING;
+               brakeStartTime = millis();
+               speed1 = ESC_NEUTRAL;
+            }
+            else if (targetState == STATE_FORWARD && currentState == STATE_REVERSE)
+            {
+               // 从倒车切到前进：先刹车
+               currentState = STATE_BRAKING;
+               brakeStartTime = millis();
+               speed1 = ESC_NEUTRAL;
+            }
+            else if (currentState == STATE_BRAKING)
+            {
+               // 刹车中：检查是否延迟结束
+               if (millis() - brakeStartTime >= BRAKE_DELAY_MS)
+               {
+                  // 延迟结束，允许切换
+                  currentState = targetState;
+                  speed1 = targetSpeed;
+               }
+               else
+               {
+                  // 继续刹车
+                  speed1 = ESC_NEUTRAL;
+               }
+            }
+            else
+            {
+               // 正常输出
+               currentState = targetState;
+               speed1 = targetSpeed;
+            }
+         }
       }
+
+      motor.writeMicroseconds(speed1);
       delay(80);
    }
    else
    {
-      motor.writeMicroseconds(900);
+      // 未接收到数据，检查信号超时
+      if (currentTime - lastSignalTime > SIGNAL_TIMEOUT_MS)
+      {
+         // 信号超时，执行失联保护
+         if (!signalLost) {
+            signalLost = true;
+            Serial.println("警告：信号丢失！");
+         }
+         
+         signalLostCount++;
+         
+         // 安全停止：电机和舵机都回中
+         motor.writeMicroseconds(ESC_NEUTRAL);
+         duoji.write(SERVO_NEUTRAL_ANGLE);
+         currentState = STATE_NEUTRAL;
+         
+         // 每隔1秒输出一次警告（避免刷屏）
+         if (signalLostCount % 10 == 0) {
+            Serial.print("信号丢失持续: ");
+            Serial.print((currentTime - lastSignalTime) / 1000.0);
+            Serial.println("秒");
+         }
+      }
+      else
+      {
+         // 信号短暂中断但未超时，保持当前状态或回中（可选）
+         motor.writeMicroseconds(ESC_NEUTRAL);
+      }
+      
+      delay(10); // 短延迟，快速检测信号恢复
    }
 }
