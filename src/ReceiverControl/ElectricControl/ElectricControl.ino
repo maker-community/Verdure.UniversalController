@@ -18,9 +18,11 @@ const int ESC_DEADBAND = 5;  // 中位死区，避免抖动
 const bool CALIBRATION_BY_POWER = true; // 按住power进入校准模式
 const int CALIBRATION_THRESHOLD = 50; // 校准阈值（摇杆超过此值进入最大）
 const float THROTTLE_EXPO = 1.7f; // 油门曲线>1更柔和
-const int BRAKE_DELAY_MS = 300; // 倒车前刹车延迟（毫秒）
+const float REVERSE_EXPO = 2.2f; // 倒车曲线>1更柔和（比前进更柔和）
 const unsigned long SIGNAL_TIMEOUT_MS = 200; // 信号超时阈值（毫秒）
 const int SERVO_NEUTRAL_ANGLE = 85; // 舵机中位角度
+const float REVERSE_SMOOTH_FACTOR = 0.15f; // 倒车速度平滑系数（0.1-0.3，越小越平滑）
+const int REVERSE_MAX_PERCENT = 80; // 倒车最大速度百分比（80=80%最大速度）
 int callibrate = 2;
 
 int pos = 0; // 角度存储变量
@@ -30,10 +32,9 @@ unsigned long lastSignalTime = 0; // 最后接收到信号的时间
 bool signalLost = true; // 信号丢失标志
 unsigned int signalLostCount = 0; // 连续丢失计数
 
-// 倒车保护状态机
-enum ThrottleState { STATE_NEUTRAL, STATE_FORWARD, STATE_REVERSE, STATE_BRAKING };
-ThrottleState currentState = STATE_NEUTRAL;
-unsigned long brakeStartTime = 0;
+// 倒车平滑过渡
+int currentSpeed = ESC_NEUTRAL; // 当前实际速度
+int targetSpeed = ESC_NEUTRAL;  // 目标速度
 
 Servo motor;
 Servo duoji;
@@ -123,71 +124,49 @@ void loop()
       }
       else
       {
-         // 正常模式：带倒车保护
+         // 正常模式：电调已有倒车保护，代码只负责平滑控制
          if (abs(ry) <= ESC_DEADBAND)
          {
             speed1 = ESC_NEUTRAL;
-            currentState = STATE_NEUTRAL;
+            targetSpeed = ESC_NEUTRAL;
+            currentSpeed = ESC_NEUTRAL;
          }
          else
          {
             // 油门曲线：上推(-100)=正向, 下推(100)=反向
             float x = ry / 100.0f; // -1..1
             float ax = fabs(x);
-            float curved = pow(ax, THROTTLE_EXPO);
+            float curved;
+            
+            // 根据方向使用不同的曲线
+            if (x < 0) {
+               // 前进使用标准曲线
+               curved = pow(ax, THROTTLE_EXPO);
+            } else {
+               // 倒车使用更柔和的曲线
+               curved = pow(ax, REVERSE_EXPO);
+            }
+            
             float y = (x < 0) ? -curved : curved; // -1..1
 
-            int targetSpeed = ESC_NEUTRAL;
-            ThrottleState targetState = STATE_NEUTRAL;
-
+            // 计算目标速度
             if (y < 0)
             {
                // 上推（负值）：正向
                targetSpeed = ESC_NEUTRAL + (int)((MAX_SIGNAL - ESC_NEUTRAL) * (-y));
-               targetState = STATE_FORWARD;
-            }
-            else
-            {
-               // 下推（正值）：反向
-               targetSpeed = ESC_NEUTRAL - (int)((ESC_NEUTRAL - MIN_SIGNAL) * y);
-               targetState = STATE_REVERSE;
-            }
-
-            // 倒车保护逻辑
-            if (targetState == STATE_REVERSE && currentState == STATE_FORWARD)
-            {
-               // 从前进切到倒车：先刹车
-               currentState = STATE_BRAKING;
-               brakeStartTime = millis();
-               speed1 = ESC_NEUTRAL;
-            }
-            else if (targetState == STATE_FORWARD && currentState == STATE_REVERSE)
-            {
-               // 从倒车切到前进：先刹车
-               currentState = STATE_BRAKING;
-               brakeStartTime = millis();
-               speed1 = ESC_NEUTRAL;
-            }
-            else if (currentState == STATE_BRAKING)
-            {
-               // 刹车中：检查是否延迟结束
-               if (millis() - brakeStartTime >= BRAKE_DELAY_MS)
-               {
-                  // 延迟结束，允许切换
-                  currentState = targetState;
-                  speed1 = targetSpeed;
-               }
-               else
-               {
-                  // 继续刹车
-                  speed1 = ESC_NEUTRAL;
-               }
-            }
-            else
-            {
-               // 正常输出
-               currentState = targetState;
+               // 前进：直接响应（保持原有灵敏度）
+               currentSpeed = targetSpeed;
                speed1 = targetSpeed;
+            }
+            else
+            {
+               // 下推（正值）：反向（限制最大速度）
+               float reverseRange = (ESC_NEUTRAL - MIN_SIGNAL) * (REVERSE_MAX_PERCENT / 100.0f);
+               targetSpeed = ESC_NEUTRAL - (int)(reverseRange * y);
+               // 倒车：渐进式速度调整（平滑过渡）
+               float speedDiff = targetSpeed - currentSpeed;
+               currentSpeed += (int)(speedDiff * REVERSE_SMOOTH_FACTOR);
+               speed1 = currentSpeed;
             }
          }
       }
@@ -211,7 +190,8 @@ void loop()
          // 安全停止：电机和舵机都回中
          motor.writeMicroseconds(ESC_NEUTRAL);
          duoji.write(SERVO_NEUTRAL_ANGLE);
-         currentState = STATE_NEUTRAL;
+         currentSpeed = ESC_NEUTRAL;
+         targetSpeed = ESC_NEUTRAL;
          
          // 每隔1秒输出一次警告（避免刷屏）
          if (signalLostCount % 10 == 0) {
